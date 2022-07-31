@@ -1,31 +1,49 @@
 #include"pagelib.hh"
-#include<iostream>
-#include<fstream>
-using namespace std;
-
-PageLib::PageLib(DirScanner& dirscanner,FileProcesser& fileprocesser)
+PageLib::PageLib(DirScanner& dirscanner)
 :_dirScanner(dirscanner)
-,_fileProcesser(fileprocesser)
 {
-	_pages.reserve(500);
+	_pages.reserve(6000);//预开空间
 }
-void PageLib::create(){
+void PageLib::create(){//创建网页库和偏移库
 	vector<string> names=_dirScanner.files();
-	int mapLine=0;
-	for(auto filename:names){
-		_pages.push_back(_fileProcesser.process(filename));
-		map<int,pair<int,int>> offset=_fileProcesser.offset();
-		
-		for(int i=1;i<=offset.size();i++){
-			_offsetLib.insert({i+mapLine,{offset[i].first,offset[i].second}});
+	int article=0;//统计所有页面的文章总数
+	unsigned int length=0;//统计总长度
+	for(auto name:names){
+		string filename="../resource/yuliao_web/"+name;
+		XMLDocument doc;
+		doc.LoadFile(filename.c_str());
+		if(doc.ErrorID()){
+			cout<<"loadfile fail!"<<endl;
+			exit(0);
 		}
-		mapLine+=offset.size();
-	}
-	for(auto str:_pages){
-		cout<<str;
-	}
-	for(int i=1;i<=_offsetLib.size();i++){
-		cout<<i<<" "<<_offsetLib[i].first<<" "<<_offsetLib[i].second<<endl;
+		XMLElement *itemNode=doc.RootElement()->FirstChildElement("channel")->FirstChildElement("item");
+		while(itemNode){
+			string title=itemNode->FirstChildElement("title")->GetText();
+			string link=itemNode->FirstChildElement("link")->GetText();
+			//content都没有，若有description，优先用它替代，若没有description,用title替代
+			string content;
+			if(itemNode->FirstChildElement("description"))
+				content=itemNode->FirstChildElement("description")->GetText();
+			else
+				content=title;
+			regex reg("<[^>]+>");
+			content=regex_replace(content,reg,"");
+			//存入_pages
+			string str;
+			str+="<doc>\n";
+			str+="<docid>"+std::to_string(article+1)+"</docid>\n";
+			str+="<title>"+title+"</title>\n";
+			str+="<link>"+link+"</link>\n";
+			str+="<content>"+content+"</content>\n";
+			str+="</doc>\n";
+			_pages.push_back(str);
+			int len=str.length();
+			//存入_offsetLib
+			_offsetLib.insert({article+1,{length,len}});
+			article++;
+			length+=len;
+			itemNode=itemNode->NextSiblingElement("item");
+		}
 	}
 }
 
