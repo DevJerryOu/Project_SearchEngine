@@ -1,25 +1,19 @@
 #include <iostream>
+#include <fstream>
 #include "Configuration.hpp"
-#include "DirScanner.hpp"
+#include "WordSegmentation.hpp"
+#include "WebPage.hpp"
+#include "PageLibPreprocessor.hpp"
+#include "pagelib.hpp"
+using std::ifstream;
 int main()
 {
     Configuration *conf = Configuration::getInstance();
-    map<string, string> mp = conf->getConfigMap();
-    DirScanner dscan;
-    for (auto iter = mp.begin(); iter != mp.end(); iter++)
-    {
-        if (iter->first == "web_yuliao")
-        {
-            dscan.traverse(iter->second);
-            break;
-        }
-    }
-    int count = 0;
-    vector<string> tmp = dscan.files();
-    for (auto iter = tmp.begin(); iter != tmp.end(); iter++)
-    {
-        cout << *iter << endl;
-        count++;
-    }
-    cout << count << endl;
+    DirScanner dir;
+    dir.traverse((*conf)["web_yuliao"]);
+
+    PageLib pagelib(dir, *conf);
+    pagelib.create();
+    pagelib.store();
+    // PageLibPreprocessor prepro(*conf);
 }
