@@ -1,14 +1,35 @@
-SRC=./src
-INC=./include/
-SOURCE:=$(wildcard $(SRC)/*.cc)
+#基本epoll-OOP框架的路径
+FRAMEWORK_SRC_PATH=./src/framework/
+FRAMEWORK_INC_PATH=./include/framework/
+
+OU_BRANCH_CACHE_SRC_PATH:=./src/cache/
+OU_BRANCH_CACHE_INC_PATH:=./include/cache/
+
+FRAMEWORK_SOURCE:=$(wildcard $(FRAMEWORK_SRC_PATH)/*.cc)
+
+OU_BRANCH_CACHE_SOURCE:=$(wildcard $(OU_BRANCH_CACHE_SRC_PATH)/*.cc)
+
+TEST:=./src/TestEchoServer.cc
+# -I指定头文件目录
+
+# 前缀"-I"必须要在每个PATH之前 不能-I $(PATH1) $(PATH2) --> 否则g++会将后者视为文件
+
+FRAMEWORK_INCLUDE:=-I $(FRAMEWORK_INC_PATH) 
+OU_BRANCH_CACHE_INCLUDE:=-I $(OU_BRANCH_CACHE_INC_PATH)
+# 基本的框架 要连接多线程动态库
+FRAMEWORK_LINKS:=-lpthread
+# ou_branch 连接redis++和hiredis
+OU_BRANCH_CACHE_LINKS:=-lredis++ -lhiredis
+COMPILE_ARGS:=-std=c++17
+
 OUTS:=./bin/main
 CC:=g++
-INCLUDE:= -I $(INC)
-LINKS:=-lpthread
+
+
 RUN:=./bin/./main
 
-${OUTS}:${SOURCE}
-	$(CC) $^ -o $@ $(LINKS) $(INCLUDE)
+${OUTS}:${FRAMEWORK_SOURCE} $(OU_BRANCH_CACHE_SOURCE) $(TEST)
+	$(CC) $^ -o $@ $(FRAMEWORK_LINKS) $(OU_BRANCH_CACHE_LINKS) $(COMPILE_ARGS) $(FRAMEWORK_INCLUDE) $(OU_BRANCH_CACHE_INCLUDE)
 	
 .PHONY:clean
 
