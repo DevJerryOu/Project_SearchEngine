@@ -8,20 +8,25 @@
 #include <utility>
 #include "Configuration.hpp"
 #include "WordSegmentation.hpp"
+#include "../include/simhash/Simhasher.hpp"
 using std::map;
 using std::pair;
 using std::sort;
 using std::string;
 using std::vector;
+using namespace simhash;
+typedef unsigned long int unit64_t;
 class WebPage
 {
-    //判断文章是否相等，按docid排序未完成
-    const static int TOPK_NUMBER = 5;
+    const static int TOPK_NUMBER = 10;
+
+	friend bool operator==(const WebPage & lhs,const WebPage & rhs);//判断两篇文章是否相等
+	friend bool operator<(const WebPage & lhs,const WebPage & rhs);//对文章按docid进行排序
 
 public:
     WebPage(string &, Configuration &, WordSegmentation &);
-    int getDocId();
-    string getDoc();
+    int getDocId() const;
+    string getDoc() const;
     map<string, int> &getWordsMap();
 
 private:
@@ -36,9 +41,10 @@ private:
     string _docUrl;
     string _docContent;
     string _docSummary;
-    vector<string> _topWords;   //词频最高的5个词
-    map<string, int> _wordsMap; //词语及频率
+    vector<string> _topWords;   //词频最高的10个词
+    map<string, int> _wordsMap; //文章所有词语及频率
 };
+
 typedef pair<string, int> PAIR;
 struct CmpByValue
 {
