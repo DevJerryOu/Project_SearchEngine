@@ -2,16 +2,16 @@
 #ifndef __REDISPP_CACHE_H__
 #define __REDISPP_CACHE_H__
 
-#define _GLIBCXX_USE_CXX11_ABI 0
+//#define _GLIBCXX_USE_CXX11_ABI 0
 
 //#include "VirtualCache.h"
 #include <sw/redis++/redis++.h>
+#include <optional>
 #include <iostream>
 #include <string>
 #include <set>
 
-
-using namespace std;
+//using namespace std;
 using namespace sw::redis;
 
 // 这里采用Redis++来做缓存，就不用自己设计数据成员了，因为所有的数据都在Redis服务器那里存着
@@ -23,6 +23,8 @@ using namespace sw::redis;
 //          "hello 树先生",
 //          "hello venus",
 //          "hello baby"  } 
+// 上面的假设是错的，这个项目跟单词联想没关系，只需要简单的取交集匹配即可
+
 class RedisPPCache
 //:public VirtualCache
 {
@@ -33,22 +35,17 @@ public:
     // create cache
     void addElement(const std::string& , const std::string& ) ;
     // retrieve cache
-    std::string getElement(const std::string& );
+    std::optional<std::string> getElement(const std::string& );
     // // ulter(update) cache 
     // void updateElement( const std::string& , const std::string );
     // delete cache
-    void delElement(const Redis& redisInstance,const std::string&) ;
+    void delElement(const std::string& key);
 
 private:
     Redis&& _redisInstance;
     std::string _hashTableName;
 
 };
-
-
-
-
-
 
 #endif
 #endif

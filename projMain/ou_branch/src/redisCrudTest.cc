@@ -1,4 +1,4 @@
-#define _GLIBCXX_USE_CXX11_ABI 0
+//#define _GLIBCXX_USE_CXX11_ABI 0
 #include "RedisPPCache.h"
 #include <initializer_list>
 #include <set>
@@ -101,7 +101,8 @@ int main(){
     // for(auto& it: result){
     //     cout << *it << endl;
     // }
-
+    
+    // 序列化
     boost::json::object val;
     val["a_string"] = "test_string";
     val["a_number"] = 123;
@@ -114,10 +115,10 @@ int main(){
 
     std::string str = serialize(val);
 
-    cout << "str = " << str << endl;
+    cout << "str = " << str << std::endl;
     auto tmp1 = redis.hset("hash","hello",str);
     if(tmp1){
-        cout << "hset successful!" << endl;
+        cout << "hset successful!" << std::endl;
     }
 
     //cout << val["a_bool"] << endl;
@@ -126,19 +127,18 @@ int main(){
     boost::json::object val1_object;
     val1 = parse(str);
     val1_object = val1.get_object();
-    cout << val1_object["a_number"] << endl;
+    cout << val1_object["a_number"] << std::endl;
     std::string testKey = "hello redispp";  
-    RedisPPCache rpc(std::move(redis),"hash1");
+    RedisPPCache rpc(std::move(redis),"hash");
     rpc.addElement(testKey,str);
 
-    std::string resultTmp1 = rpc.getElement(testKey);
-    cout << "resultTmp1=" << resultTmp1 << endl;
+    std::optional<std::string> resultTmp1 = rpc.getElement(testKey);
+    cout << "resultTmp1=" << *resultTmp1 << std::endl;
 
-    
-
-
-
+    rpc.delElement("field1");
     
     // auto res1 = redis.command<OptionalString>("hgetall","hash");
     // cout << "res1:" << res1 << endl;
+
+    return 0;
 }

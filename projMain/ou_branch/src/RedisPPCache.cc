@@ -12,24 +12,28 @@ void RedisPPCache::addElement(
 const std::string& key, 
 const std::string& value )
 {
-    cout << "hello!" << endl;
+    std::cout << "hello!" << std::endl;
     // *redisInstance.hset(tableName,key,value);
 
     auto result = _redisInstance.hset(this->_hashTableName,key,value);
     if(result){
-        cout << "addElement successful:key = " << key << ',' << " value = " << value << endl;
+        std::cout << "addElement successful:key = " << key << ',' << " value = " << value << std::endl;
     }
     else {
-        cout << "addElement failed!" << endl;
+        std::cout << "addElement failed!" << std::endl;
 
     }
 
 }
 
 // retrieve cache
-std::string RedisPPCache::getElement( const string& key ){
+std::optional<std::string> RedisPPCache::getElement( const std::string& key ){
     auto str = _redisInstance.hget(this->_hashTableName,key);
-    return str;
+    if(str){
+        return str;
+    }
+    else 
+        return std::nullopt;
 }
 
 // // ulter(update) cache 
@@ -38,8 +42,12 @@ std::string RedisPPCache::getElement( const string& key ){
 // }
 
 // delete cache
-void RedisPPCache::delElement(const Redis& redisInstance,const string& key){
-    cout << "hello!" << endl;
+void RedisPPCache::delElement(const std::string& key){
+    
+    auto res = _redisInstance.hdel(_hashTableName,key);
+    if(res){
+        std::cout << "key = " << key << "has been removed!" << std::endl;
+    }
 }
 
 #endif
