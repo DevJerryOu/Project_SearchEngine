@@ -3,7 +3,7 @@
 #include <iostream>
 #include "Configuration.hpp"
 #include "SplitTool.hpp"
-#include "cppjieba/include/cppjieba/Jieba.hpp"
+#include "simhash-master/deps/cppjieba/Jieba.hpp"
 class WordSegmentation : public SplitTool
 {
 public:
