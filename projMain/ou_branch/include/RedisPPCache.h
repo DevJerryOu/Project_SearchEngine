@@ -2,12 +2,14 @@
 #ifndef __REDISPP_CACHE_H__
 #define __REDISPP_CACHE_H__
 
+#define _GLIBCXX_USE_CXX11_ABI 0
+
 //#include "VirtualCache.h"
 #include <sw/redis++/redis++.h>
 #include <iostream>
 #include <string>
 #include <set>
-//#include "VirtualCache.h"
+
 
 using namespace std;
 using namespace sw::redis;
@@ -26,14 +28,20 @@ class RedisPPCache
 {
 public:
 
+    RedisPPCache(Redis&&,std::string);
+
     // create cache
-    void addElement( const string& , const set<string> );
+    void addElement(const std::string& , const std::string& ) ;
     // retrieve cache
-    set<string> getElement( const string& ) ;
+    std::string getElement(const std::string& );
     // // ulter(update) cache 
-    // void updateElement( const string& , const string );
+    // void updateElement( const std::string& , const std::string );
     // delete cache
-    void delElement(const string&) ;
+    void delElement(const Redis& redisInstance,const std::string&) ;
+
+private:
+    Redis&& _redisInstance;
+    std::string _hashTableName;
 
 };
 

@@ -1,13 +1,35 @@
 #if 1
 #include "RedisPPCache.h"
 
-// create cache
-void RedisPPCache::addElement( const string& key, const set<string> value ){
-    cout << "hello!" << endl;
+RedisPPCache::RedisPPCache(Redis&& redisInstance,std::string str)
+:_redisInstance(std::move(redisInstance)),
+ _hashTableName(str)
+{
+
 }
-// retrieve cache
-set<string> getElement( const string& key ){
+// create cache
+void RedisPPCache::addElement(
+const std::string& key, 
+const std::string& value )
+{
     cout << "hello!" << endl;
+    // *redisInstance.hset(tableName,key,value);
+
+    auto result = _redisInstance.hset(this->_hashTableName,key,value);
+    if(result){
+        cout << "addElement successful:key = " << key << ',' << " value = " << value << endl;
+    }
+    else {
+        cout << "addElement failed!" << endl;
+
+    }
+
+}
+
+// retrieve cache
+std::string RedisPPCache::getElement( const string& key ){
+    auto str = _redisInstance.hget(this->_hashTableName,key);
+    return str;
 }
 
 // // ulter(update) cache 
@@ -16,7 +38,7 @@ set<string> getElement( const string& key ){
 // }
 
 // delete cache
-void delElement(const string& key){
+void RedisPPCache::delElement(const Redis& redisInstance,const string& key){
     cout << "hello!" << endl;
 }
 

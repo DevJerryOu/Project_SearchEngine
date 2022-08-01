@@ -11,13 +11,13 @@ using namespace std; // 可能是个坑
 class VirtualCache{
 public:
     // create cache
-    virtual void addElement( const string& , const set<string> ) = 0;
+    virtual void addElement( const std::string& , const set<std::string> ) = 0;
     // retrieve cache
-    virtual set<string> getElement( const string& ) = 0;
+    virtual set<std::string> getElement( const std::string& ) = 0;
     // // ulter(update) cache 
     // void updateElement( const string& , const string );
     // delete cache
-    virtual void delElement(const string&) = 0;
+    virtual void delElement(const std::string&) = 0;
 
 };
 

@@ -1,6 +1,11 @@
+#define _GLIBCXX_USE_CXX11_ABI 0
 #include "RedisPPCache.h"
 #include <initializer_list>
 #include <set>
+#include <string>
+#include <boost/json/src.hpp>
+
+using namespace boost::json;
 
 // 8.1上午 任务是把<string,set<string>>写到redis中
 // set<string>得用initializer_list<string>代替
@@ -80,28 +85,60 @@ int main(){
 //                 "hello motor",
 //                 "hello 书线索",
 //                 "hello teacher!"};
-    string candidateWordList = {
+    std::string candidateWordList = {
         "hello motor,hello 书线索,hello teacher!"
     };
 
     
     // cwl1.value.insert("hello 树先生","hello motor");
 
-    auto val = redis.hset("hash","hello",candidateWordList);
-    //auto val = redis.hset(cwl1.key,cwl1.value);
-    if(val){
-        cout << "set successful!" << endl;
-    }
+    // auto val = redis.hset("hash","hello",candidateWordList);
+    // //auto val = redis.hset(cwl1.key,cwl1.value);
+    // if(val){
+    //     cout << "set successful!" << endl;
+    // }
     // auto result = redis.hget("hash","hello");
     // for(auto& it: result){
     //     cout << *it << endl;
     // }
 
+    boost::json::object val;
+    val["a_string"] = "test_string";
+    val["a_number"] = 123;
+    val["a_null"] = nullptr;
+    val["a_array"] = {
+        1, "2", boost::json::object({{"123", "123"}})
+    };
+    val["a_object"].emplace_object()["a_name"] = "a_data";
+    val["a_bool"] = true;
+
+    std::string str = serialize(val);
+
+    cout << "str = " << str << endl;
+    auto tmp1 = redis.hset("hash","hello",str);
+    if(tmp1){
+        cout << "hset successful!" << endl;
+    }
+
+    //cout << val["a_bool"] << endl;
+
+    boost::json::value val1;
+    boost::json::object val1_object;
+    val1 = parse(str);
+    val1_object = val1.get_object();
+    cout << val1_object["a_number"] << endl;
+    std::string testKey = "hello redispp";  
+    RedisPPCache rpc(std::move(redis),"hash1");
+    rpc.addElement(testKey,str);
+
+    std::string resultTmp1 = rpc.getElement(testKey);
+    cout << "resultTmp1=" << resultTmp1 << endl;
 
     
-    
-    
 
+
+
+    
     // auto res1 = redis.command<OptionalString>("hgetall","hash");
     // cout << "res1:" << res1 << endl;
 }
