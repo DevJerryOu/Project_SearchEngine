@@ -16,5 +16,5 @@ ${OUTS}:${SOURCE}
 clean:
 	rm $(OUTS)
 run:
-	$(RUN)
+	$(OUTS)
 
