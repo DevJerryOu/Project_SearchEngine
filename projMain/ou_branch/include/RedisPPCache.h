@@ -4,7 +4,7 @@
 
 //#define _GLIBCXX_USE_CXX11_ABI 0
 
-//#include "VirtualCache.h"
+#include "VirtualCache.h"
 #include <sw/redis++/redis++.h>
 #include <optional>
 #include <iostream>
@@ -26,20 +26,20 @@ using namespace sw::redis;
 // 上面的假设是错的，这个项目跟单词联想没关系，只需要简单的取交集匹配即可
 
 class RedisPPCache
-//:public VirtualCache
+:public VirtualCache
 {
 public:
 
     RedisPPCache(Redis&&,std::string);
 
     // create cache
-    void addElement(const std::string& , const std::string& ) ;
+    void addElement(const std::string& , const std::string& ) override ;
     // retrieve cache
-    std::optional<std::string> getElement(const std::string& );
+    std::optional<std::string> getElement(const std::string& ) override;
     // // ulter(update) cache 
     // void updateElement( const std::string& , const std::string );
     // delete cache
-    void delElement(const std::string& key);
+    void delElement(const std::string&) override;
 
 private:
     Redis&& _redisInstance;

@@ -1,4 +1,4 @@
-#if 0
+#if 1
 #ifndef __VIRTUAL_CACHE_H__
 #define __VIRTUAL_CACHE_H__
 
@@ -11,9 +11,9 @@ using namespace std; // 可能是个坑
 class VirtualCache{
 public:
     // create cache
-    virtual void addElement( const std::string& , const set<std::string> ) = 0;
+    virtual void addElement( const std::string& , const std::string& ) = 0;
     // retrieve cache
-    virtual set<std::string> getElement( const std::string& ) = 0;
+    virtual std::optional<std::string> getElement( const std::string& ) = 0;
     // // ulter(update) cache 
     // void updateElement( const string& , const string );
     // delete cache
