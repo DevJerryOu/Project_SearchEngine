@@ -1,10 +1,12 @@
 #ifndef _PAGELIBPREPROCESSOR_HPP_
 #define _PAGELIBPREPROCESSOR_HPP_
+#include <math.h>
 #include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <string>
 #include <sstream>
+#include <utility>
 #include "WordSegmentation.hpp"
 #include "WebPage.hpp"
 using std::istringstream;

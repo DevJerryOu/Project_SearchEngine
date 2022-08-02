@@ -2,8 +2,8 @@
 WebPage::WebPage(string &str, Configuration &conf, WordSegmentation &wordsegmentation)
 { //构造函数里调用文档的处理函数
     processDoc(str, conf, wordsegmentation);
-
-    //生成摘要,频率top5词组成
+//	cout<<"process finish"<<endl;
+	//生成摘要,频率top5词组成
     for (int i = 0; i < TOPK_NUMBER; i++)
     {
         _docSummary += _topWords[i];
@@ -17,6 +17,12 @@ WebPage::WebPage(string &str, Configuration &conf, WordSegmentation &wordsegment
 int WebPage::getDocId() const
 {
     return _docId;
+}
+string WebPage::getTitle() const{
+	return _docTitle;
+}
+string WebPage::getContent() const{
+	return _docContent;
 }
 string WebPage::getDoc() const
 {
@@ -40,8 +46,9 @@ void WebPage::processDoc(const string &str, Configuration &conf, WordSegmentatio
     _docTitle = str.substr(pos2 + 7, pos3 - 15 - pos2);
     _docUrl = str.substr(pos3 + 6, pos4 - pos3 - 13);
     _docContent = str.substr(pos4 + 9, pos5 - pos4 - 19);
-
+//	cout<<"doc finish"<<endl;
     vector<string> vec1 = wordsegmentation.cut(_docTitle);
+//	cout<<"cut finish"<<endl;
     for (int i = 0; i < vec1.size(); i++)
     {
         if (_wordsMap.find(vec1[i]) != _wordsMap.end())
@@ -66,8 +73,9 @@ void WebPage::processDoc(const string &str, Configuration &conf, WordSegmentatio
             _wordsMap[vec1[i]] = 1;
         }
     }
-
+//	cout<<"before"<<endl;
     calcTopK(_topWords, TOPK_NUMBER, conf.getStopWordList());
+//	cout<<"after"<<endl;
 }
 void WebPage::calcTopK(vector<string> &wordsVec, int k, set<string> &stopWordList)
 {
@@ -86,38 +94,39 @@ void WebPage::calcTopK(vector<string> &wordsVec, int k, set<string> &stopWordLis
 
     //按词频排序，提取前5个词频
     vector<PAIR> vec_tmp(_wordsMap.begin(), _wordsMap.end());
+//	cout<<"vec_tmp.size():"<<vec_tmp.size()<<endl;
     sort(vec_tmp.begin(), vec_tmp.end(), CmpByValue());
+//	cout<<"sort finish"<<endl;
     for (int i = 0; i < k; i++)
     {
         // cout << vec_tmp[i].first << endl;
-        wordsVec.push_back(vec_tmp[i].first);
+//		cout<<"for():"<<i<<endl;
+		wordsVec.push_back(vec_tmp[i].first);
+//		cout<<"push_back finish"<<endl;
     }
 }
-bool operator==(const WebPage &lhs, const WebPage &rhs)
-{
-    Simhasher sim("../include/simhash-master/dict/jieba.dict.utf8", "../include/simhash-master/dict/hmm_model.utf8", "../include/simhash-master/dict/idf.utf8", "../include/simhash-master/dict/stop_words.utf8");
-    string s1 = lhs.getDoc();
-    string s2 = rhs.getDoc();
-    size_t topN = 8;
-    unit64_t u64_1, u64_2;
-    vector<pair<string, double>> res1, res2; //存放词和权重
-    sim.extract(s1, res1, topN);
-    sim.extract(s2, res2, topN);
-    sim.make(s1, topN, u64_1);
-    sim.make(s2, topN, u64_2);
-    cout << "u64_1:" << u64_1 << endl;
-    cout << "u64_2:" << u64_2 << endl;
-    //海明距离默认为3，可在isEqual第三个参数处重新设置
-    if (Simhasher::isEqual(u64_1, u64_2))
-        return true;
-    else
-        return false;
+bool operator==(const WebPage& lhs, const WebPage& rhs){
+	Simhasher sim("../include/simhash/dict/jieba.dict.utf8",
+			      "../include/simhash/dict/hmm_model.utf8",
+				  "../include/simhash/dict/idf.utf8",
+				  "../include/simhash/dict/stop_words.utf8");
+	string s1=lhs.getDoc();
+	string s2=rhs.getDoc();
+	size_t topN=8;
+	unit64_t u64_1,u64_2;
+	vector<pair<string, double>> res1,res2;//存放词和权重
+	sim.extract(s1,res1,topN);
+	sim.extract(s2,res2,topN);
+	sim.make(s1,topN,u64_1);
+	sim.make(s2,topN,u64_2);
+	cout<<"u64_1:"<<u64_1<<endl;
+	cout<<"u64_2:"<<u64_2<<endl;
+	//海明距离默认为3，可在isEqual第三个参数处重新设置
+	if(Simhasher::isEqual(u64_1,u64_2)) return true;
+	else return false;
 }
 //按Docid排序
-bool operator<(const WebPage &lhs, const WebPage &rhs)
-{
-    if (lhs.getDocId() < rhs.getDocId())
-        return true;
-    else
-        return false;
+bool operator<(const WebPage& lhs, const WebPage& rhs){
+	if(lhs.getDocId() < rhs.getDocId()) return true;
+	else return false;
 }
