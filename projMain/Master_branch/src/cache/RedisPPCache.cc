@@ -1,7 +1,5 @@
 #if 1
-
-#include "../../include/cache/RedisPPCache.h"
-//#include "RedisPPCache.h"
+#include "RedisPPCache.h"
 
 RedisPPCache::RedisPPCache(Redis&& redisInstance,std::string str)
 :_redisInstance(std::move(redisInstance)),

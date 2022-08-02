@@ -1,9 +1,6 @@
 #if 0
 //#define _GLIBCXX_USE_CXX11_ABI 0
-
-#include "../../include/cache/RedisPPCache.h"
-//#include "RedisPPCache.h"
-
+#include "RedisPPCache.h"
 #include <initializer_list>
 #include <set>
 #include <string>
@@ -144,6 +141,14 @@ int main(){
     // auto res1 = redis.command<OptionalString>("hgetall","hash");
     // cout << "res1:" << res1 << endl;
 
+    // 增加多态特性 ，如果要自己写一个LRUCache，可以拓展
+    VirtualCache *vc;
+    RedisPPCache rpc1(std::move(redis),"hash1");
+    vc = &rpc1;
+    vc->addElement(testKey,str);
+
+
     return 0;
 }
+
 #endif
