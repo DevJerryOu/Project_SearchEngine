@@ -7,12 +7,14 @@ PageLib::PageLib(DirScanner &dirscanner, Configuration &conf)
 void PageLib::create()
 { //创建网页库和偏移库
 	vector<string> names = _dirScanner.files();
+	cout<<"names.size():"<<names.size()<<endl;
 	int article = 0;		 //统计所有页面的文章总数
 	unsigned int length = 0; //统计总长度
 	string path = _conf["web_yuliao"] + "/";
 	for (auto name : names)
 	{
 		string filename = path + name;
+		cout<<filename<<endl;
 		XMLDocument doc;
 		doc.LoadFile(filename.c_str());
 		if (doc.ErrorID())
@@ -42,7 +44,7 @@ void PageLib::create()
 			str += "<content>" + content + "</content>\n";
 			str += "</doc>\n";
 			_pages.push_back(str);
-			int len = str.length() - 6;
+			int len = str.length();
 			//存入_offsetLib
 			_offsetLib.insert({article + 1, {length, len}});
 			article++;
@@ -50,6 +52,16 @@ void PageLib::create()
 			itemNode = itemNode->NextSiblingElement("item");
 		}
 	}
+	/*
+	for(auto page:_pages){
+		cout<<page.c_str()<<endl;
+	}
+	for(auto elem:_offsetLib){
+		cout<<elem.first<<" "<<elem.second.first<<" "<<elem.second.second<<endl;
+	}
+	cout<<"article:"<<article<<endl;
+	cout<<"length:"<<length<<endl;
+	*/
 }
 
 void PageLib::store()
