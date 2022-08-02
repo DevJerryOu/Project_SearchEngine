@@ -9,7 +9,6 @@
 using std::cout;
 using std::endl;
 
-
 class MyTask
 {
 public:

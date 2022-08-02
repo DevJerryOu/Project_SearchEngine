@@ -140,12 +140,14 @@ void EventLoop::handleNewConnection()
 
     //创建Tcp连接
     TcpConnectionPtr con(new TcpConnection(peerfd, this));
+    
     //注册三个事件
     con->setConnectionCallback(_onConectionCb);
     con->setMessageCallback(_onMessageCb);
     con->setCloseCallback(_onCloseCb);
 
     _conns.insert(std::make_pair(peerfd, con));
+    // 
     con->handleConnectionCallback();
 }
 

@@ -50,7 +50,6 @@ private:
     TcpConnectionCallback _onMessageCb;
     TcpConnectionCallback _onCloseCb;
 
-
 };
 
 #endif
