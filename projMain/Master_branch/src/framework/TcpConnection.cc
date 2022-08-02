@@ -36,7 +36,14 @@ void TcpConnection::sendInLoop(const string &msg)
     /* this->send(msg); */
     if(_loop)
     {
-        _loop->runInLoop(std::bind(&TcpConnection::send, this, msg));
+        #if 0
+        void TcpConnection::send(const string &msg)
+        {
+            _sockIO.writen(msg.c_str(), msg.size());
+        }
+        #endif
+        _loop->runInLoop(std::bind(&TcpConnection::send, this, msg)); // 发送的操作就在上面
+
         //void runInLoop(function<void()>)
     }
 }

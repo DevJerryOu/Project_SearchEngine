@@ -5,9 +5,11 @@
 #include "ThreadPool.h"
 #include <iostream>
 #include <unistd.h>
+#include <boost/json/src.hpp>
 
 using std::cout;
 using std::endl;
+
 
 class MyTask
 {
@@ -32,6 +34,7 @@ public:
         //EventLoop的引用或者指针)
         //
     }
+
 private:
     string _msg;
     TcpConnectionPtr _con;
@@ -79,16 +82,65 @@ public:
     {
         cout << con->toString() << " has connected!" << endl;
     }
+
+    void echoService(const TcpConnectionPtr &con)
+    {
+        //实现了回显服务
+        string msg =  con->receive();
+        cout << "recv from client msg : " << msg << endl;
+        //msg是应该做处理的,就是业务逻辑的处理
+        //将msg的处理交给线程池
+        MyTask task(msg, con);
+        _pool.addTask(std::bind(&MyTask::process, task));
+    }
+
+    std::string getCandidateWordsList(const string& keyWords)
+    {
+        // 填写逻辑
+    }
+
+    void moduleOne_KeyWordsRecommend(const TcpConnectionPtr &con)
+    {
+        // 模块一 关键词推荐
+        string msg =  con->receive();//从client接收关键词
+        cout << "recv from client msg : " << msg << endl;
+        // 从json格式的值中获取key_word
+        boost::json::value val1;
+        boost::json::object val1_object;
+        val1 = boost::json::parse(msg);
+        val1_object = val1.get_object();
+        std::cout << val1_object["key_words"] << std::endl;
+        
+        // std::string keyWords = val1.get_string();
+        // ！！！如何通过字段名拿到字段值string？
+        auto keyWords = val1_object["key_words"];
+        // 拿到关键词 开始执行查询
+        auto candidateWordsList = getCandidateWordsList(keyWords);
+        
+
+        
+        //msg是应该做处理的,就是业务逻辑的处理
+        //将msg的处理交给线程池
+        MyTask task(msg, con);
+        _pool.addTask(std::bind(&MyTask::process, task));
+    }
     
     void onMessage(const TcpConnectionPtr &con)
     {
+        #if 0
         //实现了回显服务
-       string msg =  con->receive();
-       cout << "recv from client msg : " << msg << endl;
-       //msg是应该做处理的,就是业务逻辑的处理
-       //将msg的处理交给线程池
-       MyTask task(msg, con);
-       _pool.addTask(std::bind(&MyTask::process, task));
+        string msg =  con->receive();
+        cout << "recv from client msg : " << msg << endl;
+        //msg是应该做处理的,就是业务逻辑的处理
+        //将msg的处理交给线程池
+        MyTask task(msg, con);
+        _pool.addTask(std::bind(&MyTask::process, task));
+        #endif
+
+        // echo服务
+        echoService(con);
+
+
     }
 
     void onClose(const TcpConnectionPtr &con)
