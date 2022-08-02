@@ -6,13 +6,17 @@
 #include <map>
 #include <algorithm>
 #include <utility>
+#define LOGGER_LEVEL LL_WARN
 #include "Configuration.hpp"
 #include "WordSegmentation.hpp"
+#include "../include/simhash-master/include/simhash/Simhasher.hpp"
 using std::map;
 using std::pair;
 using std::sort;
 using std::string;
 using std::vector;
+using namespace simhash;
+typedef unsigned long int unit64_t;
 class WebPage
 {
     const static int TOPK_NUMBER = 5;
@@ -20,9 +24,10 @@ class WebPage
 public:
     WebPage(string &, Configuration &, WordSegmentation &);
     int getDocId() const;
-	string getTitle() const;
-	string getContent() const;
+    string getTitle() const;
+    string getContent() const;
     string getDoc() const;
+    string getSummary() const;
     map<string, int> &getWordsMap();
 
 private:
@@ -37,7 +42,7 @@ private:
     string _docUrl;
     string _docContent;
     string _docSummary;
-    vector<string> _topWords;   //词频最高的10个词
+    vector<string> _topWords;   //词频最高的5个词
     map<string, int> _wordsMap; //文章所有词语及频率
 };
 

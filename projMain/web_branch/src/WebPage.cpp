@@ -2,8 +2,8 @@
 WebPage::WebPage(string &str, Configuration &conf, WordSegmentation &wordsegmentation)
 { //构造函数里调用文档的处理函数
     processDoc(str, conf, wordsegmentation);
-//	cout<<"process finish"<<endl;
-	//生成摘要,频率top5词组成
+    //	cout<<"process finish"<<endl;
+    //生成摘要,频率top5词组成
     for (int i = 0; i < TOPK_NUMBER; i++)
     {
         _docSummary += _topWords[i];
@@ -18,15 +18,21 @@ int WebPage::getDocId() const
 {
     return _docId;
 }
-string WebPage::getTitle() const{
-	return _docTitle;
+string WebPage::getTitle() const
+{
+    return _docTitle;
 }
-string WebPage::getContent() const{
-	return _docContent;
+string WebPage::getContent() const
+{
+    return _docContent;
 }
 string WebPage::getDoc() const
 {
     return _doc;
+}
+string WebPage::getSummary() const
+{
+    return _docSummary;
 }
 map<string, int> &WebPage::getWordsMap()
 {
@@ -36,6 +42,7 @@ void WebPage::processDoc(const string &str, Configuration &conf, WordSegmentatio
 {
     //先提取网页库的string 提取出每个string的id，title，url，content，summary
     //调用jieba对文档进行分割，并解析出每个词语的使用频率
+    // cout << "process start" << endl;
     _doc = str;
     int pos1 = str.find("<docid>");
     int pos2 = str.find("<title>");
@@ -46,36 +53,15 @@ void WebPage::processDoc(const string &str, Configuration &conf, WordSegmentatio
     _docTitle = str.substr(pos2 + 7, pos3 - 15 - pos2);
     _docUrl = str.substr(pos3 + 6, pos4 - pos3 - 13);
     _docContent = str.substr(pos4 + 9, pos5 - pos4 - 19);
-//	cout<<"doc finish"<<endl;
-    vector<string> vec1 = wordsegmentation.cut(_docTitle);
-//	cout<<"cut finish"<<endl;
-    for (int i = 0; i < vec1.size(); i++)
+    // cout << "cut start1" << endl;
+    string cutWord = _docTitle + _docContent;
+    vector<string> vec = wordsegmentation.cut(cutWord);
+    // cout << "cut finish1" << endl;
+    for (int i = 0; i < vec.size(); i++)
     {
-        if (_wordsMap.find(vec1[i]) != _wordsMap.end())
-        {
-            _wordsMap[vec1[i]]++;
-        }
-        else
-        {
-            _wordsMap[vec1[i]] = 1;
-        }
+        _wordsMap[vec[i]]++;
     }
-    vec1.clear();
-    vec1 = wordsegmentation.cut(_docContent);
-    for (int i = 0; i < vec1.size(); i++)
-    {
-        if (_wordsMap.find(vec1[i]) != _wordsMap.end())
-        {
-            _wordsMap[vec1[i]]++;
-        }
-        else
-        {
-            _wordsMap[vec1[i]] = 1;
-        }
-    }
-//	cout<<"before"<<endl;
     calcTopK(_topWords, TOPK_NUMBER, conf.getStopWordList());
-//	cout<<"after"<<endl;
 }
 void WebPage::calcTopK(vector<string> &wordsVec, int k, set<string> &stopWordList)
 {
@@ -94,14 +80,14 @@ void WebPage::calcTopK(vector<string> &wordsVec, int k, set<string> &stopWordLis
 
     //按词频排序，提取前5个词频
     vector<PAIR> vec_tmp(_wordsMap.begin(), _wordsMap.end());
-//	cout<<"vec_tmp.size():"<<vec_tmp.size()<<endl;
+    //	cout<<"vec_tmp.size():"<<vec_tmp.size()<<endl;
     sort(vec_tmp.begin(), vec_tmp.end(), CmpByValue());
-//	cout<<"sort finish"<<endl;
+    //	cout<<"sort finish"<<endl;
     for (int i = 0; i < k; i++)
     {
         // cout << vec_tmp[i].first << endl;
-//		cout<<"for():"<<i<<endl;
-		wordsVec.push_back(vec_tmp[i].first);
-//		cout<<"push_back finish"<<endl;
+        //		cout<<"for():"<<i<<endl;
+        wordsVec.push_back(vec_tmp[i].first);
+        //		cout<<"push_back finish"<<endl;
     }
 }

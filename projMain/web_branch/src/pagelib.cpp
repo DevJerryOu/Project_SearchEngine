@@ -7,18 +7,18 @@ PageLib::PageLib(DirScanner &dirscanner, Configuration &conf)
 void PageLib::create()
 { //创建网页库和偏移库
 	vector<string> names = _dirScanner.files();
-	cout<<"names.size():"<<names.size()<<endl;
+	cout << "names.size():" << names.size() << endl;
 	int article = 0;		 //统计所有页面的文章总数
 	unsigned int length = 0; //统计总长度
 	string path = _conf["web_yuliao"] + "/";
 	for (auto name : names)
 	{
 		string filename = path + name;
-		cout<<filename<<endl;
 		XMLDocument doc;
 		doc.LoadFile(filename.c_str());
 		if (doc.ErrorID())
 		{
+			cout << doc.ErrorIDToName << endl;
 			cout << "loadfile fail!" << endl;
 			exit(0);
 		}

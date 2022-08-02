@@ -3,8 +3,7 @@
 #include <iostream>
 #include "Configuration.hpp"
 #include "SplitTool.hpp"
-#include "../include/simhash/cppjieba/Jieba.hpp"//change
-#define LOGGER_LEVEL LL_WARN
+#include "simhash-master/deps/cppjieba/Jieba.hpp"
 class WordSegmentation : public SplitTool
 {
 public:
