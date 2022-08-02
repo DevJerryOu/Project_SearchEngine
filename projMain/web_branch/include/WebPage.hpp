@@ -6,23 +6,16 @@
 #include <map>
 #include <algorithm>
 #include <utility>
-#define LOGGER_LEVEL LL_WARN
 #include "Configuration.hpp"
 #include "WordSegmentation.hpp"
-#include "../include/simhash/Simhasher.hpp"
 using std::map;
 using std::pair;
 using std::sort;
 using std::string;
 using std::vector;
-using namespace simhash;
-typedef unsigned long int unit64_t;
 class WebPage
 {
     const static int TOPK_NUMBER = 5;
-
-	friend bool operator==(const WebPage & lhs,const WebPage & rhs);//判断两篇文章是否相等
-	friend bool operator<(const WebPage & lhs,const WebPage & rhs);//对文章按docid进行排序
 
 public:
     WebPage(string &, Configuration &, WordSegmentation &);

@@ -4,9 +4,9 @@ WordSegmentation::WordSegmentation()
 }
 vector<string> WordSegmentation::cut(const string &sentence)
 {
-    const char *const DICT_PATH = "../include/simhash-master/dict/jieba.dict.utf8";
-    const char *const HMM_PATH = "../include/simhash-master/dict/hmm_model.utf8";
-    const char *const IDF_PATH = "../include/simhash-master/dict/idf.utf8";
+    const char *const DICT_PATH = "../include/simhash/dict/jieba.dict.utf8";
+    const char *const HMM_PATH = "../include/simhash/dict/hmm_model.utf8";
+    const char *const IDF_PATH = "../include/simhash/dict/idf.utf8";
 
     cppjieba::Jieba jieba(DICT_PATH,
                           HMM_PATH,

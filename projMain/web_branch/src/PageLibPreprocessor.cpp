@@ -61,23 +61,151 @@ void PageLibPreprocessor::readInfoFromFile(string webPath, string offPath, Confi
 	}
 	
 }
+void PageLibPreprocessor::getSimhash(){
+	cout<<"enter getSimhash()"<<endl;
+	Simhasher sim("../include/simhash/dict/jieba.dict.utf8",
+		          "../include/simhash/dict/hmm_model.utf8",
+			      "../include/simhash/dict/idf.utf8",
+			      "../include/simhash/dict/stop_words.utf8");
+	size_t topN=8;
+	string str;
+	unit64_t u64;
+	vector<pair<string,double>> res;
+	unit12_t a,b,c,d;
+	unit64_t x=65535;
+	for(auto &elem:_pageLib){
+		str=elem.getDoc();
+		sim.extract(str,res,topN);
+		sim.make(str,topN,u64);
+		cout<<elem.getDocId()<<":"<<u64<<endl;
+		//压入_simhashVal
+		_simhashVal.insert({elem.getDocId(),u64});
+		a=(u64&(x<<48))>>48;
+		b=(u64&(x<<32))>>32;
+		c=(u64&(x<<16))>>16;
+		d=u64&x;
+		cout<<a<<" "<<b<<" "<<c<<" "<<d<<endl;
+		auto it1=_partA.find(a);
+		auto it2=_partB.find(b);
+		auto it3=_partC.find(c);
+		auto it4=_partD.find(d);
+		//压入_partA
+		if(it1!=_partA.end()){//已经存在
+			it1->second.push_back({u64,elem.getDocId()});
+		}
+		else{
+			vector<pair<unit64_t,int>> tmp;
+			tmp.push_back({u64,elem.getDocId()});
+			_partA.insert({a,tmp});
+		}
+		//压入_partB
+		if(it2!=_partB.end()){//已经存在
+			it2->second.push_back({u64,elem.getDocId()});
+		}
+		else{
+			vector<pair<unit64_t,int>> tmp;
+			tmp.push_back({u64,elem.getDocId()});
+			_partB.insert({b,tmp});
+		}
+		//压入_partC
+		if(it3!=_partC.end()){//已经存在
+			it3->second.push_back({u64,elem.getDocId()});
+		}
+		else{
+			vector<pair<unit64_t,int>> tmp;
+			tmp.push_back({u64,elem.getDocId()});
+			_partC.insert({c,tmp});
+		}
+		//压入_partD
+		if(it4!=_partD.end()){//已经存在
+			it4->second.push_back({u64,elem.getDocId()});
+		}
+		else{
+			vector<pair<unit64_t,int>> tmp;
+			tmp.push_back({u64,elem.getDocId()});
+			_partD.insert({d,tmp});
+		}
+	}
+}
 void PageLibPreprocessor::cutRedundantPages()
 {
     int lines=_offsetLib.size();
-	//网页去重，找到重复的网页，在文档表和索引表去除相应的表项
+	getSimhash();
 	cout<<"cutRedundantPages()"<<endl;
-	cout<<"size:"<<_pageLib.size()<<endl;
-	for(int i=0;i<_pageLib.size()-1;i++){
-		for(int j=i+1;j<_pageLib.size();j++){
-			cout<<"i:"<<i<<" "<<"j:"<<j<<endl;
-			if(_pageLib[i]==_pageLib[j]){
-				_offsetLib.erase(i+1);//map里已经没有重复的
-				cout<<"erase docid:"<<i+1<<endl;
-				break;
+//	cout<<"size:"<<_pageLib.size()<<endl;
+	unit12_t a,b,c,d;
+	for(int i=0;i<_pageLib.size();i++){
+		unit64_t simhash=_simhashVal.find(i+1)->second;
+		cout<<i+1<<":"<<simhash<<endl;
+		unit64_t x=65535;
+		a=(simhash&(x<<48))>>48;
+		b=(simhash&(x<<32))>>32;
+		c=(simhash&(x<<16))>>16;
+		d=simhash&x;
+		cout<<a<<" "<<b<<" "<<c<<" "<<d<<endl;
+		auto it1=_partA.find(a);
+		auto it2=_partB.find(b);
+		auto it3=_partC.find(c);
+		auto it4=_partD.find(d);
+		bool isSame=0;
+		if(it1!=_partA.end()){
+			for(auto &elem:it1->second){
+				if(elem.second!=i+1
+				   &&Simhasher::isEqual(simhash,elem.first)
+				   &&_offsetLib.find(elem.second)!=_offsetLib.end()){
+					_offsetLib.erase(i+1);
+					cout<<"erase docid:"<<i+1<<endl;
+					isSame=1;
+					break;
+				}
+			}
+		}
+		if(isSame) continue;
+		if(it2!=_partB.end()){
+			for(auto &elem:it2->second){
+				if(elem.second!=i+1
+				   &&Simhasher::isEqual(simhash,elem.first)
+				   &&_offsetLib.find(elem.second)!=_offsetLib.end()){
+					_offsetLib.erase(i+1);
+					cout<<"erase docid:"<<i+1<<endl;
+					isSame=1;
+					break;
+				}
+			}
+		}
+		if(isSame) continue;
+		if(it3!=_partC.end()){
+			for(auto &elem:it3->second){
+				if(elem.second!=i+1
+				   &&Simhasher::isEqual(simhash,elem.first)
+				   &&_offsetLib.find(elem.second)!=_offsetLib.end()){
+					_offsetLib.erase(i+1);
+					cout<<"erase docid:"<<i+1<<endl;
+					isSame=1;
+					break;
+				}
+			}
+		}
+		if(isSame) continue;
+		if(it4!=_partD.end()){
+			for(auto &elem:it4->second){
+				if(elem.second!=i+1
+				   &&Simhasher::isEqual(simhash,elem.first)
+				   &&_offsetLib.find(elem.second)!=_offsetLib.end()){
+					_offsetLib.erase(i+1);
+					cout<<"erase docid:"<<i+1<<endl;
+					isSame=1;
+					break;
+				}
 			}
 		}
 	}
 	//打印测试
+	if(_offsetLib.find(26)==_offsetLib.end())
+		cout<<"26"<<endl;
+	if(_offsetLib.find(30)==_offsetLib.end())
+		cout<<"30"<<endl;
+	cout<<"lines:"<<lines<<endl;
 	for(int i=1;i<=lines;i++){
 		if(_offsetLib.find(i)!=_offsetLib.end()){
 			cout<<i<<" "<<_offsetLib[i].first<<" "<<_offsetLib[i].second<<endl;
@@ -90,7 +218,7 @@ void PageLibPreprocessor::buildInvertIndexTable()//填倒排索引的数据结�
 {	
 	cout<<"buildInvertIndexTable()"<<endl;
 	int N=0;
-	//统计去重后文档数N;初步填好倒排索引结构,double为出现次数
+	//1.统计去重后文档数N;初步填好倒排索引结构,double为出现次数
 	for(auto page:_pageLib){
 		if(_offsetLib.find(page.getDocId())==_offsetLib.end()) continue;//跳过重复的
 		N++;
@@ -101,7 +229,7 @@ void PageLibPreprocessor::buildInvertIndexTable()//填倒排索引的数据结�
 		}
 		cout<<endl;
 		*/
-		for(auto map:wordmap){//map是迭代器
+		for(auto map:wordmap){
 			auto iter=_invertIndexTable.find(map.first);
 			if(iter==_invertIndexTable.end()){
 //				cout<<"不存在"<<endl;
@@ -117,65 +245,47 @@ void PageLibPreprocessor::buildInvertIndexTable()//填倒排索引的数据结�
 			}
 		}
 	}
-	/*
-	//打印检查倒排索引表1.0
-	for(auto elem: _invertIndexTable){//迭代器
-		cout<<elem.first<<" ";
-		int n=0;
-		for(auto data:elem.second){
-			cout<<data.first<<" "<<data.second;
-			if(n<elem.second.size()) cout<<" ";
-		}
-		cout<<endl;
-	}
-	*/
-	
+	//2.按string遍历,_invertIndexTable中double是在每篇文章中的权重
 	for(auto & word:_invertIndexTable){//word是迭代器
 		int DF=word.second.size();//包含该词的文章个数
 //		cout<<"DF:"<<DF<<endl;
 		double IDF=log(N)/log(DF+1);//逆文档频率
 //		cout<<"IDF:"<<IDF<<endl;
-		vector<double> w;//每篇文章中的权重
-		vector<double> wUnify;//归一化权重
-		//记录这个词在每篇文章中的权重，一行
+//		vector<double> w;//每篇文章中的权重
+//		vector<double> wUnify;//归一化权重
 		for(auto &data:word.second){
 			int TF=data.second;//这个词在这篇文章中的次数
 //			cout<<"TF:"<<TF<<endl;
 			double wTemp=TF*IDF;//权重
 //			cout<<"wTemp:"<<wTemp<<endl;
-			w.push_back(wTemp);
+			data.second=wTemp;
 		}
-		/*
-		//test
-		for(auto& data:w){
-			cout<<data<<" ";
-		}
-		cout<<endl;
-		*/
-		//求归一化权重分母
-		double wDown;
-		for(auto& wPer:w){
-			wDown+=pow(wPer,2);
-		}
-		wDown=sqrt(wDown);
-//		cout<<"wDown:"<<wDown<<endl;
-		//记录归一化权重
-		for(auto& wPer:w){
-//			cout<<wPer/wDown<<" ";
-			wUnify.push_back(wPer/wDown);
-		}
-		//将得到的归一化权重写入对应vector的第二个参数
-		int i=0;
-		for(auto& data:word.second){
-			data.second=wUnify[i];
-			i++;
-		}
-		//每行打印测试
-		cout<<word.first<<" ";
+	}
+	//3.求每篇文章的归一化权重分母
+	vector<double> wDown={0};
+	wDown.reserve(6000);
+	for(auto &word:_invertIndexTable){
 		for(auto &data:word.second){
-			cout<<data.first<<" "<<data.second<<" ";
+			wDown[data.first-1]+=pow(data.second,2);
 		}
-		cout<<endl;
+	}
+	//开方
+	for(auto &down:wDown){
+		down=sqrt(down);
+	}
+	//4.写入归一化权重
+	for(auto &word:_invertIndexTable){
+		double wUnify;
+		for(auto &data:word.second){
+			wUnify=data.second/wDown[data.first-1];
+			data.second=wUnify;
+		}
+	}
+	//打印测试
+	for(auto &word:_invertIndexTable){
+		for(auto &data:word.second){
+			cout<<word.first<<" "<<data.first<<" "<<data.second<<endl;
+		}
 	}
 	/*
 	//打印测试
@@ -200,14 +310,12 @@ void PageLibPreprocessor::storeOnDisk()//不用重新存网页库和偏移库，
 		exit(0);
 	}
 	for(auto& word:_invertIndexTable){
-		ofs<<word.first<<" ";
-		int n=0;
 		for(auto& idx:word.second){
-			ofs<<idx.first<<" "<<idx.second;
-			if(n<word.second.size()) ofs<<" ";
-			n++;
+			ofs<<word.first
+				<<" "<<idx.first
+				<<" "<<idx.second
+				<<endl;
 		}
-		ofs<<endl;
 	}
 	ofs.close();
 }
