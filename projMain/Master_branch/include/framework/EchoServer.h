@@ -15,6 +15,11 @@ using std::endl;
 using namespace boost::json;
 using namespace std::literals; // string_view
 
+typedef enum _taskType_s{
+    _KeyWordsRecommend,
+    _ArticleSearch
+}TaskType;
+
 namespace ModuleOne{
 
     struct KeyWordsObj{
@@ -133,61 +138,101 @@ public:
         _pool.addTask(std::bind(&MyTask::process, task));
     }
 
-    std::vector<std::string> getCandidateWordsList(const std::string& keyWords)
+    std::set<std::string> getCandidateWordsList(const std::string& keyWord)
     {
         // 填写逻辑
     }
 
-    void moduleOne_KeyWordsRecommend(const TcpConnectionPtr &con)
+    std::vector<std::string> getArticle(const std::string& confirmWord){
+        // 填写逻辑
+    }
+
+    std::string moduleOne_KeyWordsRecommend(const std::string& msg)
     {
-        // 模块一 关键词推荐
-        std::string msg =  con->receive();//从client接收关键词 JSON格式
-        cout << "recv from client msg : " << msg << endl;
-        // 从json格式的值中获取key_word
+        // // 模块一 关键词推荐
+        // std::string msg =  con->receive();//从client接收关键词 JSON格式
+        // cout << "recv from client msg : " << msg << endl;
+        // 从json格式的字符串中获取key_word
         boost::json::value val1;
         boost::json::object val1_object;
         val1 = boost::json::parse(msg);
         val1_object = val1.get_object();
 
-        // 可以直接用 << 运算符将字段值输出到终端，但是不可以直接通过字段名获取字段值
-        std::cout << val1_object["key_words"] << std::endl;
-        
-        // std::string keyWords = val1.get_string();
-        
-        // // ！！！如何通过字段名拿到字段值string？
-        // auto keyWords = val1_object["key_words"];
-        // // 拿到关键词 开始执行查询
-        // auto candidateWordsList = getCandidateWordsList(keyWords);
-        
         std::string fieldValue;
         std::string fieldName2Get = "key_words";
         ModuleOne::extract(val1_object,fieldValue,fieldName2Get);
 
         //通过关键词获取到关键词列表 
-        std::vector<std::string> candidateWordsList = getCandidateWordsList(fieldValue);
+        std::set<std::string> candidateWordsList = getCandidateWordsList(fieldValue);
 
-    // { "candidate_word1":"hallo",
-    //   "candidate_word2":"hollo",
-    //   "candidate_word1":"hello" }
         boost::json::object candidateWordsListJsonObj;
-        candidateWordsListJsonObj["candidate_word1"] = candidateWordsList[0];
-        candidateWordsListJsonObj["candidate_word2"] = candidateWordsList[1];
-        candidateWordsListJsonObj["candidate_word3"] = candidateWordsList[2];
-
-        // json对象序列化成string,准备发送给client
-        std::string candidateWordsListStr = serialize(candidateWordsListJsonObj);
-
-        // 发送关键词列表给client
+        std::set<std::string>::iterator cdwlIterator = candidateWordsList.begin();
         
+        // 给json对象赋值
+        candidateWordsListJsonObj["candidate_word1"] = (*cdwlIterator);
+        cdwlIterator++;
+        candidateWordsListJsonObj["candidate_word2"] = (*cdwlIterator);
+        cdwlIterator++;
+        candidateWordsListJsonObj["candidate_word3"] = (*cdwlIterator);
 
+        // JSON对象序列化，将候选词列表发送给client
+        std::string cwl2Send = serialize(candidateWordsListJsonObj);
 
+        return cwl2Send;
         
-        //candidateWordsListJsonValue["candidate_word1"]
+    }
+
+    std::string moduleTwo_ArticleSearch(const std::string& msg)
+    {
+        // // 模块二 文章搜索
+        boost::json::value val1;
+        boost::json::object val1_object;
+        val1 = boost::json::parse(msg);
+        val1_object = val1.get_object();
         
-        //msg是应该做处理的,就是业务逻辑的处理
-        //将msg的处理交给线程池
-        MyTask task(msg, con);
-        _pool.addTask(std::bind(&MyTask::process, task));
+        std::string fieldValue;
+        std::string fieldName2Get = "confirm_word";
+        ModuleOne::extract(val1_object,fieldValue,fieldName2Get);
+
+        //通过关键词获取到文章
+        std::vector<std::string> article = getArticle(fieldValue);
+
+        std::string articleName = article[0];
+        std::string articleAbstract = article[1];
+
+        boost::json::object articleJsonObj;
+
+        // 给json对象赋值
+        articleJsonObj["article_title"] = articleName;
+        articleJsonObj["article_abstract"] = articleAbstract;
+
+        // JSON对象序列化
+        std::string cwl2Send = serialize(articleJsonObj);
+
+        return cwl2Send;
+    }
+
+    TaskType parseTask(const std::string& task) // 输入json格式的字符串，提取出任务类型并返回
+    {
+          // 从json格式的字符串中获取key_word
+        boost::json::value val1;
+        boost::json::object val1_object;
+        val1 = boost::json::parse(task);
+        val1_object = val1.get_object();
+       
+        std::string fieldValue;
+        std::string fieldName2Get = "task_type";
+        ModuleOne::extract(val1_object,fieldValue,fieldName2Get); // fieldValue是传入传出参数，此时任务类型就存在这里
+
+        if(fieldValue == "key_word_recommend")
+        {
+            return _KeyWordsRecommend;
+        }
+        else if(fieldValue == "article_search")
+        {
+            return _ArticleSearch;
+        }
+        // else 
     }
     
     void onMessage(const TcpConnectionPtr &con)
@@ -203,8 +248,26 @@ public:
         #endif
 
         // echo服务
-        echoService(con);
+       // echoService(con);
 
+        // 解析任务 到底是走模块一还是走模块二
+        std::string recvMsg =  con->receive(); //从client接收关键词 JSON格式
+        int taskType = parseTask(recvMsg);
+
+        std::string msg2Send;
+        if(_KeyWordsRecommend == taskType){
+            // 走模块一的逻辑
+            msg2Send = moduleOne_KeyWordsRecommend(recvMsg);
+        }
+
+        else if(_ArticleSearch == taskType){
+            // 走模块二的逻辑
+            msg2Send = moduleTwo_ArticleSearch(recvMsg);
+        }
+
+        // 打包成task,交给线程池去发送
+        MyTask task(msg2Send, con);
+        _pool.addTask(std::bind(&MyTask::process, task));
 
     }
 
