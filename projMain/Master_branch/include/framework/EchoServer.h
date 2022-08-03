@@ -237,26 +237,35 @@ public:
     
     void onMessage(const TcpConnectionPtr &con)
     {
-        #if 0
+        #if 1
         //实现了回显服务
         std::string msg =  con->receive();
-        cout << "recv from client msg : " << msg << endl;
+        cout << "onMessage,recv from client msg : " << msg << endl;
         //msg是应该做处理的,就是业务逻辑的处理
         //将msg的处理交给线程池
         MyTask task(msg, con);
+
         _pool.addTask(std::bind(&MyTask::process, task));
         #endif
 
         // echo服务
        // echoService(con);
 
-        // 解析任务 到底是走模块一还是走模块二
-        std::string recvMsg =  con->receive(); //从client接收关键词 JSON格式
+        // // 解析任务 到底是走模块一还是走模块二
+        // std::string recvMsg =  con->receiveKeyWord(); //从client接收关键词 JSON格式
+        
+        //std::string recvMsg =  read(); //从client接收关键词 JSON格式
+
+        
+        // cout << "recvMsg = " <<  recvMsg << endl;
+        
+        #if 0
         int taskType = parseTask(recvMsg);
 
         std::string msg2Send;
         if(_KeyWordsRecommend == taskType){
             // 走模块一的逻辑
+            cout << "in module one logic" << endl;
             msg2Send = moduleOne_KeyWordsRecommend(recvMsg);
         }
 
@@ -268,7 +277,7 @@ public:
         // 打包成task,交给线程池去发送
         MyTask task(msg2Send, con);
         _pool.addTask(std::bind(&MyTask::process, task));
-
+        #endif
     }
 
     void onClose(const TcpConnectionPtr &con)

@@ -48,15 +48,25 @@ void TcpConnection::sendInLoop(const string &msg)
     }
 }
 
-string TcpConnection::receive()
+std::string TcpConnection::receive()
 {
     char buff[65535] = {0};
-    _sockIO.readLine(buff, sizeof(buff));
+    //_sockIO.readLine(buff, sizeof(buff));
+    std::string str = _sockIO.echoRead();
 
-    return string(buff);
+    return str;
 }
 
-string TcpConnection::toString()
+std::string TcpConnection::receiveKeyWord()
+{
+    char buff[65535] = {0};
+    //_sockIO.readLine(buff, sizeof(buff));
+    //_sockIO.readKeyWord();
+    std::string str = _sockIO.echoRead();
+    return str ;
+}
+
+std::string TcpConnection::toString()
 {
     ostringstream oss;
     oss << _localAddr.ip() << ":"

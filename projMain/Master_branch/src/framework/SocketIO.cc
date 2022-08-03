@@ -6,6 +6,11 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
+#include <string>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 SocketIO::SocketIO(int fd)
 : _fd(fd)
@@ -51,6 +56,7 @@ int SocketIO::readn(char *buf, int len)
 
 int SocketIO::readLine(char *buf, int len)
 {
+    
     int left = len - 1;
     char *pstr = buf;
     int ret = 0, total = 0;
@@ -96,7 +102,20 @@ int SocketIO::readLine(char *buf, int len)
      *pstr = '\0';
 
     return total - left;
+}
 
+std::string SocketIO::echoRead()
+{
+    //char buf[1];
+    int lengthbuf;
+    recv(_fd,&lengthbuf,4,0);
+    std::cout << "length of lengthbuf = " << lengthbuf << std::endl;
+    
+    char recvbuf[1024];
+    recv(_fd,recvbuf,lengthbuf,MSG_WAITALL);
+    
+    std::cout << "SocketIO::echoRead() = " << recvbuf << std::endl;
+    return std::string(recvbuf);
 }
 
 int SocketIO::writen(const char *buf, int len)
@@ -129,4 +148,11 @@ int SocketIO::writen(const char *buf, int len)
     }
 
     return len - left;
+}
+
+std::string SocketIO::readKeyWord()
+{
+    char buf[65535];
+    recv(_fd,buf,sizeof(buf),MSG_WAITALL);
+    return std::string(buf);
 }

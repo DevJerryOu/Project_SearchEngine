@@ -21,10 +21,11 @@ class TcpConnection
 public:
     TcpConnection(int fd, EventLoop *loop);
     ~TcpConnection();
-    void send(const string &msg);
-    void sendInLoop(const string &msg);
-    string receive();
-    string toString();
+    void send(const std::string &msg);
+    void sendInLoop(const std::string &msg);
+    std::string receive();
+    std::string receiveKeyWord();
+    std::string toString();
 
     bool isClosed() const;
 
