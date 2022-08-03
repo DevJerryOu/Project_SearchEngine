@@ -7,7 +7,6 @@
 #include <string_view>
 
 using namespace boost::json;
-
 using namespace std::literals; // string_view
 
 namespace ModuleOne{
@@ -164,13 +163,14 @@ int main(){
     boost::json::object val1_object;
     val1 = parse(str);
     val1_object = val1.get_object();
+    // 可以直接用 << 运算符将字段值输出到终端，但是不可以直接通过字段名获取字段值
     cout << "va11_object[a_object] = " << val1_object["a_object"] << std::endl;
     cout << "va11_object[a_number] = " << val1_object["a_number"] << std::endl;
     cout << "val1_object[a_string] = " << val1_object["a_string"] << endl;
 
     // 将string反序列化成json对象后，因为value不可以直接用[]通过字段名取字段值取，
     // 所以将value转换成自定义的对象，再取keywords
-    ModuleOne::KeyWordsObj kwObj;
+   // ModuleOne::KeyWordsObj kwObj;
     //kwObj = ModuleOne::tag_invoke(kwObj , val1);
     std::string resStr;
     std::string testStr = "a_string";
