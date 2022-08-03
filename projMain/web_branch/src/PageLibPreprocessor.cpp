@@ -314,6 +314,16 @@ void PageLibPreprocessor::buildInvertIndexTable() //填倒排索引的数据结�
 			}
 		}
 	}
+	//存储去重之后的总文章数
+	ofstream file1("../data/fortest.txt");
+	if (!file1)
+	{
+		cout << "open fortest.txt fail!" << endl;
+		exit(0);
+	}
+	file1<<"N:"<<N<<endl;
+	file1.close();
+
 	// 2.按string遍历,_invertIndexTable中double是在每篇文章中的权重
 	for (auto &word : _invertIndexTable)
 	{									   // word是迭代器

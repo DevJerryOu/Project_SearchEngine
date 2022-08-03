@@ -4,7 +4,7 @@
 int main()
 {
 	Configuration *conf = Configuration::getInstance();
-
+#if 0
 	DirScanner dir;
 	dir.traverse((*conf)["web_yuliao"]);
 	PageLib pagelib(dir, *conf);
@@ -15,10 +15,10 @@ int main()
 	pageprocess.doProcess();
 	int pagenum = pageprocess.getPageNum();
 	cout << "pagenum=" << pagenum << endl;
-
+#endif
 #if 0
 	string str = "时代新人";
-	WebPageSearcher seach(str, *conf, 56);
+	WebPageSearcher seach(str, *conf, 56);//第三个参数需要知道去重后的总文章数
 	seach.doQuery();
 #endif
 #if 0
@@ -31,21 +31,6 @@ int main()
 	WebPageSearcher seach(str, *conf, 56);
 	seach.doQuery();
 #endif
-	/*	Configuration *conf=Configuration::getInstance();
-		WordSegmentation jieba;
-
-		string str1="<docid>21</docid> <title> 构造函数里调用文档的处理函数。雨后江汉天阔小，老周新科制多少，远山险竹林芳草，春风拂绿了芭蕉。寒梅落尽把冬了";
-		string str2="<docid>33</docid> <title>hello,world.王道在线";
-		cout<<str1<<endl;
-		cout<<str2<<endl;
-
-		WebPage page1(str1,*conf,jieba);
-		WebPage page2(str2,*conf,jieba);
-		if(page1==page2){
-			cout<<"page1=page2"<<endl;
-		}
-		else cout<<"page1!=page2"<<endl;
-		*/
 
 	return 0;
 }
