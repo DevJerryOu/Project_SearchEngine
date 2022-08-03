@@ -12,7 +12,7 @@ PageLibPreprocessor::PageLibPreprocessor(Configuration &conf) : _jieba(), _pageN
 void PageLibPreprocessor::doProcess()
 { //去除冗余网页，并创建倒排索引，并将其存至磁盘
 	//	cout<<"doProcess()"<<endl;
-	// cutRedundantPages();
+	cutRedundantPages();
 	buildInvertIndexTable();
 	storeOnDisk();
 	cout << "doneprocess()" << endl;
@@ -105,10 +105,10 @@ void PageLibPreprocessor::readInfoFromFile(string webPath, string offPath, Confi
 void PageLibPreprocessor::getSimhash()
 {
 	cout << "enter getSimhash()" << endl;
-	Simhasher sim("../include/simhash/dict/jieba.dict.utf8",
-				  "../include/simhash/dict/hmm_model.utf8",
-				  "../include/simhash/dict/idf.utf8",
-				  "../include/simhash/dict/stop_words.utf8");
+	Simhasher sim("../include/simhash-master/dict/jieba.dict.utf8",
+				  "../include/simhash-master/dict/hmm_model.utf8",
+				  "../include/simhash-master/dict/idf.utf8",
+				  "../include/simhash-master/dict/stop_words.utf8");
 	size_t topN = 8;
 	string str;
 	unit64_t u64;

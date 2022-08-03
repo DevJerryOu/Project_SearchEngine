@@ -4,7 +4,7 @@
 int main()
 {
 	Configuration *conf = Configuration::getInstance();
-#if 0
+
 	DirScanner dir;
 	dir.traverse((*conf)["web_yuliao"]);
 	PageLib pagelib(dir, *conf);
@@ -15,21 +15,22 @@ int main()
 	pageprocess.doProcess();
 	int pagenum = pageprocess.getPageNum();
 	cout << "pagenum=" << pagenum << endl;
-#endif
+
 #if 0
-	string str = "首飞成功";
+	string str = "时代新人";
 	WebPageSearcher seach(str, *conf, 56);
 	seach.doQuery();
 #endif
-
 #if 0
 	string str = "消费体验";
 	WebPageSearcher seach(str, *conf, 56);
 	seach.doQuery();
 #endif
+#if 0
 	string str = "科技创新";
 	WebPageSearcher seach(str, *conf, 56);
 	seach.doQuery();
+#endif
 	/*	Configuration *conf=Configuration::getInstance();
 		WordSegmentation jieba;
 
