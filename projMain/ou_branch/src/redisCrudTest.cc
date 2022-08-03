@@ -4,8 +4,44 @@
 #include <set>
 #include <string>
 #include <boost/json/src.hpp>
+#include <string_view>
 
 using namespace boost::json;
+
+using namespace std::literals; // string_view
+
+namespace ModuleOne{
+    struct KeyWordsObj{
+        std::string keyWords;
+    };
+
+    #if 0
+    void tag_invoke( value_from_tag, value& jv, KeyWordsObj const& kwobj )
+    {
+        jv = {
+            { "key_words" , kwobj.keyWords }
+        };
+    }
+    #endif
+
+    // This helper function deduces the type and assigns the value with the matching key
+    template<class T>
+    void extract( object const& obj, T& t, boost::core::string_view key )
+    {
+        t = value_to<T>( obj.at( key ) );
+    }
+
+    KeyWordsObj tag_invoke( value_to_tag< KeyWordsObj >, value const& jv )
+    {
+        KeyWordsObj c;
+        object const& obj = jv.as_object();
+        extract( obj, c.keyWords, "key_words" );
+        // extract( obj, c.name, "name" );
+        // extract( obj, c.current, "current" );
+        return c;
+    }
+
+}
 
 // 8.1上午 任务是把<string,set<string>>写到redis中
 // set<string>得用initializer_list<string>代替
@@ -123,18 +159,34 @@ int main(){
 
     //cout << val["a_bool"] << endl;
 
+    // 反序列化
     boost::json::value val1;
     boost::json::object val1_object;
     val1 = parse(str);
     val1_object = val1.get_object();
-    cout << val1_object["a_number"] << std::endl;
+    cout << "va11_object[a_object] = " << val1_object["a_object"] << std::endl;
+    cout << "va11_object[a_number] = " << val1_object["a_number"] << std::endl;
+    cout << "val1_object[a_string] = " << val1_object["a_string"] << endl;
+
+    // 将string反序列化成json对象后，因为value不可以直接用[]通过字段名取字段值取，
+    // 所以将value转换成自定义的对象，再取keywords
+    ModuleOne::KeyWordsObj kwObj;
+    //kwObj = ModuleOne::tag_invoke(kwObj , val1);
+    std::string resStr;
+    std::string testStr = "a_string";
+    boost::core::string_view testStrSv(testStr);
+    ModuleOne::extract(val1_object,resStr,testStr);
+
+    cout << "ModuleOne::extract() = " << resStr << endl;
+    
+    
+    
+    // 测试向redis++插入数据
     std::string testKey = "hello redispp";  
     RedisPPCache rpc(std::move(redis),"hash");
     rpc.addElement(testKey,str);
-
     std::optional<std::string> resultTmp1 = rpc.getElement(testKey);
     cout << "resultTmp1=" << *resultTmp1 << std::endl;
-
     rpc.delElement("field1");
     
     // auto res1 = redis.command<OptionalString>("hgetall","hash");
