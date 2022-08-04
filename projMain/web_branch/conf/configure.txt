@@ -1,6 +1,0 @@
-web_yuliao ../resource/web_yuliao
-stop_words_zh ../resource/stop/stop_words_zh.dat
-webpage ../data/newripepage.dat
-offset ../data/newoffset.dat
-invertIndex ../data/invertIndex.dat
-mylog ../log/mylog.dat
