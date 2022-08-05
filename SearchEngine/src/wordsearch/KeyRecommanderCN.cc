@@ -57,5 +57,6 @@ set<std::string> KeyRecommanderCN::doQuery(const std::string dictPath, const std
     // {
     //     cout << "doQuery=" << item << endl;
     // }
+    // cout << "result.size()" << result.size() << endl;
     return result;
 }

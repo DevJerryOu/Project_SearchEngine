@@ -311,13 +311,13 @@ void PageLibPreprocessor::buildInvertIndexTable() //填倒排索引的数据结�
 	}
 	// 2.按std::string遍历,_invertIndexTable中double是在每篇文章中的权重
 	for (auto &word : _invertIndexTable)
-	{									   // word是迭代器
-		int DF = word.second.size();	   //包含该词的文章个数
-										   //		cout<<"DF:"<<DF<<endl;
-		double IDF = log(N) / log(DF + 1); //逆文档频率
-										   //		cout<<"IDF:"<<IDF<<endl;
-										   //		vector<double> w;//每篇文章中的权重
-										   //		vector<double> wUnify;//归一化权重
+	{														  // word是迭代器
+		int DF = word.second.size();						  //包含该词的文章个数
+															  //		cout<<"DF:"<<DF<<endl;
+		double IDF = log2(static_cast<double>(N) / (DF + 1)); //逆文档频率
+															  //		cout<<"IDF:"<<IDF<<endl;
+															  //		vector<double> w;//每篇文章中的权重
+															  //		vector<double> wUnify;//归一化权重
 		for (auto &data : word.second)
 		{
 			int TF = data.second;	 //这个词在这篇文章中的次数
@@ -325,9 +325,42 @@ void PageLibPreprocessor::buildInvertIndexTable() //填倒排索引的数据结�
 			double wTemp = TF * IDF; //权重
 									 //			cout<<"wTemp:"<<wTemp<<endl;
 			data.second = wTemp;
+			// cout << "wTemp=" << wTemp << endl;
 		}
 	}
 	// 3.求每篇文章的归一化权重分母
+
+	for (auto &page : _pageLib)
+	{
+		map<std::string, int> &tmp = page.getWordsMap();
+		double sum = 0;
+		for (auto &word : tmp)
+		{
+			for (auto &value : _invertIndexTable[word.first])
+			{
+				if (value.first == page.getDocId())
+				{
+					// cout << "value.second" << value.second << endl;
+					sum += value.second * value.second;
+					break;
+				}
+			}
+		}
+		sum = sqrt(sum);
+		for (auto &word : tmp)
+		{
+			for (auto &value : _invertIndexTable[word.first])
+			{
+				if (value.first == page.getDocId())
+				{
+					value.second = value.second / sum;
+					break;
+				}
+			}
+		}
+	}
+
+#if 0
 	vector<double> wDown = {0};
 	wDown.reserve(6000);
 	for (auto &word : _invertIndexTable)
@@ -352,6 +385,8 @@ void PageLibPreprocessor::buildInvertIndexTable() //填倒排索引的数据结�
 			data.second = wUnify;
 		}
 	}
+#endif
+
 	ofstream file1("../conf/configure.txt", ios::app);
 	if (!file1)
 	{
@@ -383,6 +418,7 @@ void PageLibPreprocessor::buildInvertIndexTable() //填倒排索引的数据结�
 	}
 	*/
 }
+
 void PageLibPreprocessor::storeOnDisk() //不用重新存网页库和偏移库，只用标记好，然后生成倒排索引库，再存下来就好
 {
 	cout << "storeOnDisk()" << endl;

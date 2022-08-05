@@ -16,17 +16,21 @@ public:
     }
     void process()
     {
-        cout << "_msg=" << _msg << endl;
+        // cout << "_msg=" << _msg << endl;
         set<std::string> st = keyWords(_msg);
         vector<std::string> jason_string;
         cout << "st.size()=" << st.size() << endl;
+        boost::json::object inputKeyWordsObj;
         for (auto &item : st)
         {
             cout << item << endl;
             jason_string.push_back(item);
         }
-        boost::json::object inputKeyWordsObj;
-        if (jason_string.size() == 3)
+        if (jason_string.size() < 3)
+        {
+            inputKeyWordsObj["ret_type"] = "error";
+        }
+        else if (jason_string.size() == 3)
         {
             inputKeyWordsObj["ret_type"] = "choren";
             inputKeyWordsObj["candidate_word1"] = jason_string[0];

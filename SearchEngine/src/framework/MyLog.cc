@@ -36,6 +36,6 @@ void MyLog::getDataTime()
     time_t tm;
     tm = time(nullptr);
     _time = ctime(&tm);
-    cout << "_time:" << _time << endl;
+    // cout << "_time:" << _time << endl;
 }
 MyLog *MyLog::_pLog = nullptr;

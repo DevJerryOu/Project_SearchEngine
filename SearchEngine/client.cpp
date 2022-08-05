@@ -76,10 +76,10 @@ void test()
         // JSON对象序列化
         std::string cwl2Send = serialize(inputKeyWordsObj);
 
-        // cout << "cwl2Send = " << cwl2Send << endl;
+        cout << "cwl2Send = " << cwl2Send << endl;
         //  发送关键词到服务器
-        // cout << "cwl2Send.size() = " << cwl2Send.length() << endl;
-        // cout << "strlen(cwl2Send.c_str()) = " << strlen(cwl2Send.c_str()) << endl;
+        cout << "cwl2Send.size() = " << cwl2Send.length() << endl;
+        cout << "strlen(cwl2Send.c_str()) = " << strlen(cwl2Send.c_str()) << endl;
 
         // 发送json字符串的长度
         int lengthbuf = cwl2Send.length();
@@ -94,13 +94,17 @@ void test()
         // recv(clientfd,recvBuf,sizeof(recvBuf),0);
         // cout << "recvBuf = " << recvBuf << endl;
 
+        cout << "send word success" << endl;
         // 接收关键词列表json字符串的长度
         int lenOfKeyWordsList;
         recv(clientfd, &lenOfKeyWordsList, 4, 0);
+        cout << "recv wordlist" << lenOfKeyWordsList << endl;
+
         // 接收关键词列表json字符串
         char keyWordListBuf[1024] = {0};
         recv(clientfd, keyWordListBuf, lenOfKeyWordsList, MSG_WAITALL);
 
+        cout << "msg=" << keyWordListBuf << endl;
         //解析关键词列表json字符串
 
         std::string keyWordList = (std::string)keyWordListBuf;
@@ -218,6 +222,11 @@ void test()
                 continue;
             }
         }
+        else if (ret_type == "error")
+        {
+            cout << "Sorry,this word not exist" << endl;
+            continue;
+        }
 
         // 得到confirmWord
         // 打包到json
@@ -268,8 +277,8 @@ void test()
         extract(articleJsonObj, fieldValue2, fieldName2Get2);
 
         // 获取到了文章信息，打印到终端显示给用户
-        cout << "article_title" << fieldValue1 << endl;
-        cout << "article_abstract" << fieldValue2 << endl;
+        cout << "article_title: " << fieldValue1 << endl;
+        cout << "article_abstract: " << fieldValue2 << endl;
     }
 
     close(clientfd);

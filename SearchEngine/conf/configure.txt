@@ -4,4 +4,4 @@ webpage ../data/newripepage.dat
 offset ../data/newoffset.dat
 invertIndex ../data/invertIndex.dat
 mylog ../conf/mylog.dat
-pageNum 3809
+pageNum 3803

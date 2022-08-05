@@ -84,7 +84,101 @@ std::string WebPageQuery::doQuery(const std::string &str)
     // cout << str_tmp << endl;
     WebPage page(str_tmp, *(Configuration::getInstance()), ws);
     // cout << page.getDoc() << endl;
-    return "Title:" + page.getTitle() + "\nAbstract:" + page.getSummary();
+    std::string content = getContent(segWord, page.getTitle() + page.getContent());
+    // return "Title:" + page.getTitle() + "\nAbstract:" + page.getSummary();
+    return "Title:" + page.getTitle() + "\nAbstract:" + content;
+}
+
+// std::string WebPageQuery::getContent(vector<std::string> word, string doc)
+// {
+//     string ret = "";
+//     cout << doc << endl;
+//     for (int i = 0; i < word.size(); i++)
+//     {
+//         int pos = doc.find(word[i]);
+//         cout << "pos=" << pos << endl;
+//         if (doc.size() - pos < 15)
+//         {
+//             ret += doc.substr(pos, doc.size() - pos);
+//         }
+//         else
+//         {
+//             int num = 15;
+//             for (int j = pos; j < pos + 15; j++)
+//             {
+//                 const char *ch = word[j].c_str();
+//                 int nBytes = 1;
+//                 if (*ch & (1 << 7))
+//                 {
+
+//                     for (int idx = 0; idx != 6; ++idx)
+//                     {
+//                         if (*ch & (1 << (6 - idx)))
+//                         {
+//                             ++nBytes;
+//                         }
+//                         else
+//                             break;
+//                     }
+//                 }
+//                 if (nBytes == 1)
+//                 {
+//                     num++;
+//                 }
+//             }
+//             if (pos + num >= doc.size())
+//             {
+//                 ret += doc.substr(pos, doc.size() - pos);
+//                 break;
+//             }
+//             else
+//             {
+//                 ret += doc.substr(pos, num);
+//             }
+//             ret += " ";
+//         }
+//     }
+//     return ret;
+// }
+size_t WebPageQuery::nBytesCode(const char ch)
+{
+    if (ch & (1 << 7))
+    {
+        int nBytes = 1;
+        for (int idx = 0; idx != 6; ++idx)
+        {
+            if (ch & (1 << (6 - idx)))
+            {
+                ++nBytes;
+            }
+            else
+                break;
+        }
+        return nBytes;
+    }
+    return 1;
+}
+std::string WebPageQuery::getContent(vector<std::string> word, string doc)
+{
+    string ret = "";
+    cout << doc << endl;
+    for (int i = 0; i < word.size(); i++)
+    {
+        int pos = doc.find(word[i]);
+        string line = "";
+        while (pos < doc.size() && line.size() < 24)
+        {
+            int byte = nBytesCode(doc[pos]);
+            line += doc.substr(pos, byte);
+            pos += byte;
+        }
+        ret += line;
+        if (i != word.size() - 1)
+        {
+            ret += " ";
+        }
+    }
+    return ret;
 }
 void WebPageQuery::LoadLibrary(std::string offPath, std::string invertIndex)
 {

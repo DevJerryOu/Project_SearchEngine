@@ -32,6 +32,7 @@ private:
 private:
     double Calcos(vector<double> &v1, vector<double> &v2);
     std::string readWebPage(int, int);
+    size_t nBytesCode(const char);
 
 public:
     WebPageQuery(Configuration &, int);
@@ -40,6 +41,7 @@ public:
     vector<double> getQueryWordsWeightVector(vector<std::string> &);
     bool executeQuery(const vector<std::string> &queryWords);
     std::string returnNoAnswer();
+    std::string getContent(vector<std::string>, string);
 };
 typedef pair<int, double> PAIR2;
 struct CmpByValue2
